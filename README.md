@@ -46,7 +46,9 @@ yarn init
 
 ### 安装 webpack 5
 
+```json
 yarn add webpack webpack-cli webpack-dev-server webpack-merge -D
+```
 
 ### 出入口配置
 
@@ -120,7 +122,9 @@ module.exports = {
 
 ### 配置loader(Less样式、图片等资源、js)
 
+```json
 yarn add less less-loader style-loader css-loader url-loader mini-css-extract-plugin postcss-loader autoprefixer -D
+```
 
 #### 处理js|jsx
 
@@ -144,13 +148,18 @@ yarn add less less-loader style-loader css-loader url-loader mini-css-extract-pl
 
 #### 处理less
 
+```json
 yarn add less less-loader style-loader css-loader postcss-loader autoprefixer -D
-
+```
 
 style-loader：将样式注入到html的 style 标签
+
 css-loader：解析css文件，将CSS转化为CommonJS
+
 postcss-loader：处理css中的css前缀，新版配置在postcss.config.js中，webpack 里仅保留名称即可
+
 autoprefixer：自动添加css前缀，配置在postcss.config.js中
+
 less-loader：将less编译成css
 
 ```js
@@ -235,7 +244,10 @@ Babel 是一个广泛使用的 JavaScript 编译器，主要用于将 ES6/ESNext
 
 #### 安装
 
-yarn add babel-loader babel-plugin-import @babel/core @babel/preset-react @babel/preset-env @babel/plugin-transform-runtime -D
+```json
+yarn add babel-loader  @babel/core @babel/preset-react @babel/preset-env @babel/plugin-transform-runtime -D
+```
+<!-- babel-plugin-import  -->
 
 #### babel-loader
 
@@ -266,7 +278,11 @@ babel-loader + @babel/preset-react 一般一起使用，在webpack的构建过�
 是 Babel 的插件，用于按需加载第三方库，减少项目大小。antd V5 采用了CSS-in-JS 本身具有按需加载的能力，因此无需使用 babel-plugin-import 来按需加载。
 
 旧的一些Babel：
+
+babel-plugin-import 用于按需加载第三方库，减少项目大小。antd V5 采用了CSS-in-JS 本身具有按需加载的能力，因此无需使用 
+
 @babel/plugin-proposal-class-properties 用于支持 ES6 的类Class属性语法（已废弃）
+
 @babel/plugin-transform-class-properties 是将类的属性（properties）提升至类的构造函数中，已预设在@babel/preset-env中（已淘汰）
 
 
@@ -350,20 +366,27 @@ module.exports = {
 
 #### 压缩文件（Css 压缩、Js 压缩）
 
+```json
 yarn add css-minimizer-webpack-plugin terser-webpack-plugin -D
+```
 
 css-minimizer-webpack-plugin 压缩、去重css，比较耗时，只用在打包项目时，在webpack.prod.js中配置
+
 terser-webpack-plugin 实现打包后JS代码的压缩，比较耗时，只用在打包项目时，在webpack.prod.js中配置
 
 #### Html、服务
 
+```json
 yarn add html-webpack-plugin webpack-dev-server clean-webpack-plugin mini-css-extract-plugin -D
+```
 
 html-webpack-plugin 处理HTML资源。它会为你创建一个空的HTML文件，并自动引入打包输出的所有资源（比如JavaScript和CSS文件）
-webpack-dev-server 创建服务，方便你本地开发时调试
-clean-webpack-plugin 打包前自动清理上一次的输出目录文件
-mini-css-extract-plugin 将CSS单独提取出来，生成独立的CSS文件
 
+webpack-dev-server 创建服务，方便你本地开发时调试
+
+clean-webpack-plugin 打包前自动清理上一次的输出目录文件
+
+mini-css-extract-plugin 将CSS单独提取出来，生成独立的CSS文件
 
 ```js
 const path = require("path");
@@ -386,9 +409,13 @@ plugins: [
 
 #### tree-shaking、source-map、webpack-bundle-analyzer、gzip 优化
 
+```json
 yarn add webpack-bundle-analyzer -D
+```
 
-yarn add compression-webpack-plugin -D 
+```json
+yarn add compression-webpack-plugin -D (开启 gzip用)
+```
 
 webpack5默认开启tree-shaking（当打包的mode为production时），默认开启source-map，可以查看打包后代码的源码，方便调试。
 
@@ -439,15 +466,21 @@ plugins: [
 
 ## 安装 react 18 
 
+```json
 yarn add react@18.2.0 react-dom@18.2.0 react-router-dom@6.30.0 -S
+```
 
 ## 安装redux（需要就安装）
 
+```json
 yarn add redux react-redux -S
+```
 
 ## 安装UI（antd5.x）
 
+```json
 yarn add antd @ant-design/icons -S
+```
 
 ## 配置router
 
@@ -463,13 +496,19 @@ yarn add antd @ant-design/icons -S
 
 ## 注释
 webpack.config.js
+
 loader 加载器的执行顺序是从右到左，从下到上，仅在同一个 rule 中起作用
 
 1、-S (--save)
+
 用于将包添加到项目的 dependencies，表示这是在生产环境中运行时所需的依赖。
+
 例如：npm install package-name -S，这将把 package-name 添加到 dependencies 中。
+
 2、-D (--save-dev)
+
 用于将包添加到项目的 devDependencies，表示这是在开发阶段所需的依赖，例如测试工具、构建工具等。
+
 例如：npm install package-name -D，这将把 package-name 添加到 devDependencies 中
 
 
