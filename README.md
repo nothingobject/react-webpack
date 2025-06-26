@@ -265,6 +265,17 @@ babel-loader仅仅识别出了jsx文件，内部核心转译功能需要@babel/c
 
 上边我们提到了对于一些高版本内置模块，比如Promise/Generate等等@babel/preset-env并不会转化，所以@babel/plugin-transform-runtime就是帮助我们来实现这样的效果的,他会在我们项目中如果使用到了Promise之类的模块之后去实现一个低版本浏览器的polyfill
 
+1.减少重复代码
+它会把一些 Babel 转换后常用的辅助函数（比如 _extends, _classCallCheck 等）提取到单独的模块里，避免每个文件都生成一份，减小打包体积。
+
+2.避免全局污染
+它会把 Promise、Symbol、Generator 等新特性用到的 polyfill 变成“局部引入”，不会污染全局对象，避免和第三方库冲突。
+
+3.支持 async/await
+配合 regenerator: true，可以让 Babel 正确转换 async/await 语法。
+
+
+
 #### @babel/preset-react
 
 是一组预设，内置了一系列babel plugin去转化jsx代码成为我们想要的js代码,可以将.jsx文件转化为js文件的同时将jsx标签转化为React.createElement的形式。
@@ -334,6 +345,12 @@ Babel 7 引入了几个重大变化，其中最重要的是对预设（presets�
                 "libraryDirectory": "es",
                 "style": true
             }
+        ],
+        [
+            "@babel/plugin-transform-runtime",
+            {
+                "regenerator": true
+            }
         ]
     ]
 }
@@ -355,6 +372,12 @@ module.exports = {
                 libraryName: "antd",
                 libraryDirectory: "es",
                 style: true
+            }
+        ],
+        [
+            "@babel/plugin-transform-runtime",
+            {
+                "regenerator": true
             }
         ]
     ]
