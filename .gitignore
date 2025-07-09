@@ -1,13 +1,7 @@
 /.vscode/
 /node_modules/
-/build/
 /output/
 /dist/
-/public/
 /document/
-/utils/
-package-lock.json
 .history/
 .DS_Store
-pnpm-lock.yaml
-yarn.lock

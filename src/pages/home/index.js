@@ -12,19 +12,24 @@ import { useNavigate ,Outlet , useLocation,} from "react-router-dom";
 
 
 const { Header, Sider, Content } = Layout;
-const Home = (props) => {
+
+const Home = () => {
 
     const location = useLocation();
     const navigate = useNavigate();
  
     const [collapsed, setCollapsed] = useState(false);
+    const [selectedKey, setSelectedKey] = useState("1");
 
     const {token: { colorBgContainer, borderRadiusLG },} = theme.useToken();
 
     useEffect(() => {
-        console.log("useEffect Home");
         checkSelectedKey(location.pathname);
+
+        setSelectedKey(checkSelectedKey(location.pathname));
     }, [location.pathname]);
+
+    
 
     const checkSelectedKey = (pathname) => {
         if (pathname === "/") {
@@ -33,6 +38,8 @@ const Home = (props) => {
             return "2";
         } else if (pathname === "/backend") {
             return "3";
+        } else if (pathname === "/demo") {
+            return "4";
         }
         return "1"; // 默认选中首页
     }
@@ -47,6 +54,9 @@ const Home = (props) => {
         if (key === "3") {
             navigate("/backend");
         }
+        if (key === "4") {
+            navigate("/demo");
+        }
 
     };
 
@@ -57,7 +67,8 @@ const Home = (props) => {
                 <Menu
                     theme="dark"
                     mode="inline"
-                    defaultSelectedKeys={[checkSelectedKey(location.pathname)]}
+                    defaultSelectedKeys={["1"]}
+                    selectedKeys={[selectedKey]}
                     onClick={onClick}
                     items={[
                         {
@@ -78,6 +89,12 @@ const Home = (props) => {
                             label: "非管理员",
                             path: "/backend",
                         },
+                        {
+                            key: "4",
+                            icon: <UploadOutlined />,
+                            label: "测试页",
+                            path: "/demo",
+                        }
 
                     ]}
                 />

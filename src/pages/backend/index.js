@@ -1,8 +1,15 @@
-import React from 'react'
+import React,{useEffect} from 'react'
 
 const Backend = () => {
+    useEffect(() => {
+
+    }, [])
+
+
     return (
-        <h1>非管理员页面</h1>
+        <div>
+            <h1 >非管理员页面</h1>
+        </div>
     )
 }
 
