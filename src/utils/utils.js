@@ -58,7 +58,46 @@ export const getRouteAuthority = (path, routeData) => {
   return authorities;
 };
 
+// 判断loacalStorage中是否有对应key且有值
+export const isDataInLocalStorageAndNotEmpty=(key)=> {
+    return localStorage.hasOwnProperty(key) && localStorage.getItem(key) !== 'null' && localStorage.getItem(key) !== 'undefined';
+}
 
+
+/**
+ * 树形结构扁平化
+ * @param {Array} items - 要扁平化的树形数组
+ * @param {String} filepath - 文件路径
+ * @param {String} path - 路由路径
+ * @returns {Array} - 扁平化后的数组
+ */
+export const flattenMenus = (items) => {
+    return items.reduce((pre, item) => {
+        
+        // 创建当前项的扁平对象
+        const flatItem = {
+            children:item.children,
+            path:item.path,
+            filepath:item.filepath
+        };
+
+        // 删除children属性，避免重复
+        delete flatItem.children;
+        
+        if(!item.children){
+            // 将当前项添加到结果数组
+            pre.push(flatItem);
+        }
+        
+        // 如果有子项，递归处理
+        if (item.children && item.children.length > 0) {
+            
+            pre.push(...flattenMenus(item.children));
+        }
+
+        return pre;
+    }, []);
+};
 
 
 export function generateUuid(){

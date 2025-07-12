@@ -296,7 +296,22 @@ babel-plugin-import 用于按需加载第三方库，减少项目大小。antd V
 
 @babel/plugin-transform-class-properties 是将类的属性（properties）提升至类的构造函数中，已预设在@babel/preset-env中（已淘汰）
 
+#### thread-loader （2025-07-10更新）
 
+```json
+yarn add thread-loader -D
+```
+
+开启多进程模式，用于处理多线程任务，提高构建速度，优化资源应用，配置灵活，适用于大型项目
+
+```json
+{
+    loader: 'thread-loader',
+    options: {
+        workers: 2, // 设置线程数
+    },
+},
+```
 
 #### Babel 6 配置
 
@@ -1225,7 +1240,845 @@ class ErrorBoundary extends Component {
 export default withRouter(ErrorBoundary);
 ```
 
-以上就是全局错误捕获的最终解决方案
+以上就是全局错误捕获的最终解决方案,如果有问题，欢迎评论区交流
+
+
+
+## ------------ 2025-07-12 更新------------
+
+
+## 开启CSS Module
+
+<!-- 样式冲突场景 -->
+```js
+// pageA.js
+import './index.less'
+.container{
+    background: red;
+}
+```
+
+```js
+// pageB.js
+import './index.less'
+.container{
+    background: blue;
+}
+```
+如果按上面使用样式，会导致样式冲突，因为两个页面的.class类名是一样的，所以需要CSS Modules。
+
+CSS Modules是一种CSS的打包方式，它允许你在JavaScript中以模块化的方式引用CSS，从而实现局部作用域的CSS类名，避免了全局污染的问题。每个模块内的类名都是唯一的，提高了代码的安全性和可维护性。
+
+```js
+// webpack.base.js
+{
+    test: /\.css$/,
+    use: [
+            "style-loader",
+            {
+            loader: "css-loader",
+                options: {
+                    modules: true,
+                    // modules:{
+                    //     localIdentName: "[name]__[local]___[hash:base64:5]", // 自定义类名格式
+                    // }
+                },
+            },
+            "postcss-loader",
+        ],
+    }
+```
+
+按上面配置，理论上就可以使用,看到这的可以试一下下面代码
+
+```js
+// pageA.js
+import styles from './index.css'
+.container{
+    background: red;
+}
+function PageA(){
+    return <div className={styles.container}></div>
+}
+```
+
+```js
+// pageB.js
+import styles from './index.css'
+.container{
+    background: blue;
+}
+function PageB(){
+    return <div className={styles.container}></div>
+}
+```
+
+得到的结果：
+
+![alt text](./readmeimgs/image13.png)
+
+### 巨坑的Css Modules
+
+百度搜了就是这么配置的，但就是报错，不知道是不是该项目哪里少了什么配置，最后花了很久找到原因，是modules里面的namedExport，需要配置为false才可以，查了webpack5官方文档，webpack5默认是true
+
+![alt text](./readmeimgs/image14.png)
+
+感兴趣的可以取研究研究
+
+本项目采用less样式，所以需要配置less相关的
+
+```js
+{
+    test: /\.less$/,
+    use: [
+        "style-loader",
+        {
+            loader: "css-loader",
+            options: {
+                modules: {
+                    namedExport: false,
+                    localIdentName: "[name]__[local]___[hash:base64:5]", // 自定义类名格式
+                },
+            },
+        },
+        "postcss-loader",
+        "less-loader",
+    ],
+},
+
+```
+
+配置了这个之后，重启
+
+```js
+// pageA.js
+import styles from './index.less'
+.container{
+    background: red;
+}
+function PageA(){
+    return <div className={styles.container}></div>
+}
+```
+
+```js
+// pageB.js
+import styles from './index.less'
+.container{
+    background: blue;
+}
+function PageB(){
+    return <div className={styles.container}></div>
+}
+```
+
+每个页面可以正常设置局部作用域单独的样式，避免命名冲突
+
+## Redux Tookit
+
+项目采用redux，使用官方推荐的状态管理工具集Redux Tookit
+
+### 安装
+```js
+yarn add @reduxjs/toolkit  -S
+```
+
+### 使用
+
+网上教程包括官网都有介绍，这里不再赘述
+
+```js
+import { configureStore } from "@reduxjs/toolkit";
+import globalSlice from "./reducers/global";
+
+// configureStore创建一个redux数据
+const store = configureStore({
+  // 合并多个Slice
+  reducer: {
+    global: globalSlice
+  },
+});
+
+export default store;
+
+```
+
+### 配置 globalSlice
+
+该Slice用来处理menus、userinfo等全局信息
+
+```js
+import { createSlice } from '@reduxjs/toolkit'
+import { isDataInLocalStorageAndNotEmpty } from "@/utils/utils";
+
+// 缓存menus
+const catchMenus = isDataInLocalStorageAndNotEmpty('menus') ?JSON.parse(localStorage.getItem('menus')):[];
+
+// 缓存的userinfo
+const userinfo = isDataInLocalStorageAndNotEmpty('userinfo')?JSON.parse(localStorage.getItem('userinfo')):{};
+
+export const globalSlice = createSlice({
+  name: 'global',
+  initialState: {
+    // 用户信息
+    userInfo: {...userinfo},
+    // 权限信息
+    permissionInfo:{},
+    menus:[...catchMenus]
+  },
+  reducers: {
+    initmenus: (state, action) => {
+        state.menus = action.payload
+    },
+    setmenus: (state, action) => {
+        state.menus = action.payload
+        localStorage.setItem("menus", JSON.stringify(action.payload));
+    },
+    login: (state, action) => {
+        state.userInfo = action.payload.userinfo
+        localStorage.setItem('userinfo', JSON.stringify(state.userInfo));
+        localStorage.setItem('token', action.payload.token);
+    },
+    setPermissions: (state, action) => {
+      state.permissionInfo = action.payload;
+    },
+    logout: (state) => {
+      state.userInfo = {};
+      state.menus = [];
+      state.permissionInfo = {};
+      localStorage.removeItem('menus');
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('token');
+    }
+  }
+})
+// 每个 case reducer 函数会生成对应的 Action creators
+export const { login, logout, setPermissionInfo ,setmenus} = globalSlice.actions
+
+export default globalSlice.reducer
+
+```
+
+## 动态权限路由
+
+该项目模版仅考虑页面级的权限控制，如需按钮级的可以自行扩展研究，谢谢
+
+针对动态权限路由一般有两种主流的方案：
+
+1. 一种是前端注册全部路由，后端返回权限角色内的可访问路由，然后通过路由守卫authRouter控制渲染对应的页面，实现权限控制；
+这一种还有一种变种，通过在路由表里添加authority配置好对应的角色，只需返回角色role，然后通过路由守卫校验路由role过滤控制显示，如果对应角色可访问页面有变化就需要重新改代码路由里的authority，重新打包，适合角色少，页面少，能确定具体访问的场景，例如之前用的umi项目就采用这种，不够灵活，所以一般采用前面的方案。
+
+2. 另一种是后端返回权限角色内的可访问路由，前端根据返回的路由动态引入页面，动态注册路由，无需路由守卫，通过router自带的处理未定义路径跳转即可实现控制，本项目采用该方案
+
+### 注册基础路由
+
+```js
+// router/baseRouter.js
+const routers = [
+    {
+        path: "/",
+        element: <BasicLayout />,
+        children: [],
+    },
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    // 找不到对应路径时的重定向
+    {
+        path: "*",
+        element: <NoMatch />,
+        handle: {
+            crumb: () => "404"
+        }
+    },
+];
+
+```
+
+### 从后端获取menu菜单/路由
+
+```js
+// service/index.js
+// 模拟获取菜单
+export const getAdminMenus = () => {
+    return new Promise((resolve) => {
+        window.setTimeout(() => {
+            resolve([
+                {
+                    key: "/",
+                    path: "/",
+                    icon: 'UserOutlined',
+                    label: "首页",
+                    filepath: "home",
+                },
+                {
+                    key: "/admin",
+                    path: "",
+                    icon: 'VideoCameraOutlined',
+                    label: "管理员",
+                    filepath: "",
+                    children: [
+                        {
+                            key: "/admin/list",
+                            path: "/admin/list",
+                            icon: 'VideoCameraOutlined',
+                            label: "列表",
+                            filepath: "admin/list",
+                        },
+                        {
+                            key: "/admin/detail",
+                            path: "/admin/detail",
+                            icon: 'VideoCameraOutlined',
+                            label: "详情",
+                            filepath: "admin/detail",
+                        }
+                    ]
+                },
+                {
+                    key: "/backend",
+                    path: "/backend",
+                    icon: 'UploadOutlined',
+                    label: "非管理员",
+                    filepath: "backend",
+                },
+                {
+                    key: "/demo",
+                    path: "/demo",
+                    icon: 'UploadOutlined',
+                    label: "测试页",
+                    filepath: "demo",
+                },
+            ]);
+        }, 1000);
+    });
+};
+
+```
+
+项目采用Antd的Layout组件以及Menu菜单，所以需要对返回的菜单数据进行处理，添加key，icon，label等字段，以上数据是为了方便处理
+所以多定义了路由需要的path和filepath字段，path是路由的path，filepath是对应的页面文件路径，方便后面动态引入页面
+
+### 动态引入页面
+
+正常项目一般页面为了性能都会进行懒加载处理，这里采用webpack的require.context来实现动态引入，对应vite的有import.meta.glob
+
+```js
+// router/components.js
+import React from 'react';
+// 创建一个require.context，搜索pages目录下的所有js文件
+const requireComponent = require.context('../pages', true, /\.(js|jsx)$/);
+// 创建一个对象来存储所有组件的引用
+export const components = {};
+// 遍历require.context返回的所有模块ID
+requireComponent.keys().forEach((fileName) => {
+    
+  // 获取文件名（不带路径和扩展名）作为组件名
+  const componentName = fileName.replace(/^\.\//, '').replace(/\/index\.(js|jsx)$/, '');
+  
+  // 动态导入组件并存储到components对象中
+  components[componentName] = React.lazy(() => import(`../pages/${componentName}/index`));
+
+});
+export default components;
+
+```
+
+懒加载为了防止页面白屏闪烁问题，一般结合React.Suspense使用
+
+```js
+const lazyComponent = (Component) => {
+    return (
+        <ErrorBoundary> 
+            <Suspense fallback={<Skeleton active />}>
+                <Component />
+            </Suspense>
+        </ErrorBoundary>
+
+    );
+}
+// ErrorBoundary是错误捕获，不需要的可以去掉
+```
+
+### 登录页面请求接口
+
+获取需要的menus和userinfo信息，存储到 redux中，上面已经配置好了对应的redux
+
+```js
+    import { useSelector, useDispatch } from 'react-redux'
+    import { useNavigate } from "react-router-dom";
+    import { login ,setmenus} from "@/store/reducers/global";
+    import { getAdminMenus } from "@/services/index";
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const onFinish = (values) => {
+      let res = {
+        token: "000000000000000",
+        userinfo: {
+          username: "管理员",
+          avatar:
+            "https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg",
+        },
+        permissions: {
+          role: [],
+          routers: [],
+        },
+      };
+
+      dispatch(
+        login({
+          userinfo: res.userinfo,
+          token: res.token,
+        })
+      );
+
+      // 获取菜单
+      getAdminMenus().then((list) => {
+
+        dispatch(setmenus(list));
+
+        message.success("登录成功",1, () => {
+          navigate("/", { replace: true });
+        });
+      });
+    };
+```
+
+登录调取后台接口，拿到用户信息，redux存储token令牌，存储menus菜单、存储userinfo用户信息（同步缓存localStorage，防止刷新页面数据丢失），具体redux处理见上面的Redux Tookit
+
+### 主路由页面处理menus
+
+
+#### 扁平化属性Menus
+
+通过对比纯静态路由，扁平化的menus数据更好处理成router
+
+```js
+/**
+ * 树形结构扁平化
+ * @param {Array} items - 要扁平化的树形数组
+ * @param {String} filepath - 文件路径
+ * @param {String} path - 路由路径
+ * @returns {Array} - 扁平化后的数组
+ */
+export const flattenMenus = (items) => {
+    return items.reduce((pre, item) => {
+        
+        // 创建当前项的扁平对象
+        const flatItem = {
+            children:item.children,
+            path:item.path,
+            filepath:item.filepath
+        };
+
+        // 删除children属性，避免重复
+        delete flatItem.children;
+        
+        if(!item.children){
+            // 将当前项添加到结果数组
+            pre.push(flatItem);
+        }
+        
+        // 如果有子项，递归处理
+        if (item.children && item.children.length > 0) {
+            
+            pre.push(...flattenMenus(item.children));
+        }
+        return pre;
+    }, []);
+};
+
+const flattenMenu = flattenMenus(menus);// 得到扁平化的menu
+```
+
+#### menus转化成router
+
+通过map递归遍历结合上面的动态引入组件lazyComponent，转化成router路由数据
+
+```js
+
+// 动态生成路由配置
+const generateRoutes = useCallback((menus) => { //useCallback可能没用
+    return menus.map(({path='',filepath,children}) => {
+        const route = {
+            path,
+            element:filepath?lazyComponent(components[filepath]):React.createElement(),
+        };
+        return route;
+    });
+}, [menus]);
+
+const asyncrouter = generateRoutes(flattenMenu) // 拿到转换后的router路由数据(flattenMenu是扁平化后的数据)
+
+```
+
+#### 更新Router
+
+```js
+
+const updatedRoutes = [...routers];// 基础路由
+
+updatedRoutes[0].children = asyncrouter;//拼接新的完整路由
+
+setRoutes(updatedRoutes);// 更新router
+
+```
+至此就拿到了权限路由，还需要处理初次加载Loading，以及刷新页面后的数据恢复，最后页面渲染进入到上面基础路由里面的BaseLayout组件，附上完整的主路由代码
+
+```js
+
+import React, { useEffect, useState, lazy, Suspense, useCallback } from 'react'
+import { BrowserRouter, Routes, Route, useRoutes } from "react-router";
+import { useLocation, useNavigate, createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useSelector, useDispatch } from 'react-redux';
+import ErrorBoundary from "@/components/Errorhandler/ErrorBoundary";
+import { Skeleton, Spin } from 'antd';
+import components from './components'; // 动态lazy导入函数
+import routers from './baseRouter';
+import { getAdminMenus } from "@/services/index";
+import RedirectPage from '@/pages/404/index';
+import { login, setmenus } from "@/store/reducers/global";
+import { flattenMenus } from "@/utils/utils"
+
+// 解决懒加载第一次加载时的闪烁问题
+const lazyComponent = (Component) => {
+
+    return (
+        <ErrorBoundary>
+            <Suspense fallback={<Skeleton active />}>
+                <Component />
+            </Suspense>
+        </ErrorBoundary>
+
+    );
+}
+
+
+// 从后端更新menus
+const fetchMenus = (dispatch) => {
+
+    // 获取菜单
+    getAdminMenus().then((list) => {
+        dispatch(setmenus(list));
+    });
+};
+
+
+const MainRoute = () => {
+    const [isLoading, setLoading] = useState(true);
+    const [routes, setRoutes] = useState(routers);
+    const menus = useSelector((state) => state.global.menus);
+
+    const dispatch = useDispatch()
+
+    const routeElement = useRoutes(routes);
+
+    // 动态生成路由配置
+    const generateRoutes = useCallback((menus) => {
+        return menus.map(({path='',filepath,children}) => {
+            const route = {
+                path,
+                element:filepath?lazyComponent(components[filepath]):React.createElement(),
+            };
+            return route;
+        });
+    }, [menus]);
+
+
+    useEffect(() => {
+        if (menus.length > 0) {
+            // 扁平化菜单
+            const asyncrouter = generateRoutes(flattenMenus(menus))
+            
+            const updatedRoutes = [...routers];
+
+            updatedRoutes[0].children = asyncrouter;
+
+            setRoutes(updatedRoutes);
+            setLoading(false);
+            return
+        }
+        fetchMenus(dispatch);
+    }, [menus,generateRoutes,dispatch]);
+
+    if (isLoading) {
+        return <Spin />;
+    }
+
+    return  routeElement ;
+};
+
+export default MainRoute;
+
+```
+
+### 动态渲染Layout的Menu菜单
+
+#### 映射Icon
+
+接口返回的menus里的icon字符串要处理成图标组件
+
+```js
+//  layout/BasicLayout.jsx
+useEffect(() => {
+    // 加载menus，处理icon
+    const loopMenuItem = (menus) => menus.map(({ icon, children, ...item }) => ({
+        ...item,
+        icon: icon && IconMap[icon],
+        children: children ? loopMenuItem(children) : null,
+    }));
+    if (menulist?.length > 0) {
+        setMenus(loopMenuItem(menulist));
+    }
+}, [menulist]);
+
+```
+#### 设置菜单选中及点击跳转
+
+menus的key绑定了对应的路由path
+
+```js
+//  layout/BasicLayout.jsx
+/** 选中的菜单项 */
+const selectMenukey = useMemo(() => {
+    let path = location.pathname;
+    return [path];
+}, [location.pathname]);
+
+
+<Menu
+    theme="dark"
+    mode="inline"
+    defaultSelectedKeys={["/"]}
+    selectedKeys={selectMenukey}
+    onClick={({ key }) => navigate(key);} // 点击可以跳转路由
+    items={menus}
+/>
+
+```
+
+### 渲染子路由页面
+
+BasicLayout组件设置的路径是“/”，除基本路由外的任何路由都要经由BasicLayout来渲染页面，采用react router的Outlet组件来渲染子路由
+
+```js
+<Outlet />
+```
+
+### 缓存当前有效路由及登录失效判断
+
+```js
+//  layout/BasicLayout.jsx
+    const location = useLocation();
+    const navigate = useNavigate();
+    const currentUser = useSelector((state) => state.global.userInfo);
+    const isLogin = (localStorage.getItem("token") && location.pathname !== "/login") || false;
+
+    // 使用useEffect处理认证逻辑-缓存历史有效路径
+    useEffect(() => {
+        if (!currentUser || !isLogin) {
+            message.warning("登录已失效，请重新登录");
+            navigate("/login", { replace: true });
+            return
+        }
+
+        // 只记录有效页面（如不为 404 页）
+        if (location.pathname !== "/login" && location.pathname !== "*" ) {
+            sessionStorage.setItem("lastValidPath", location.pathname);
+        }
+
+    }, [currentUser, isLogin, navigate,location.pathname]);
+```
+
+附上完整BasicLayout代码
+
+```js
+//  layout/BasicLayout.jsx
+import React, { useState, useEffect, useMemo } from "react";
+import { Button, Layout, Menu, theme, Spin, message } from "antd";
+import { useNavigate, Outlet, useLocation, Navigate, useOutlet } from "react-router-dom";
+import { useSelector, useDispatch } from 'react-redux';
+import { login, logout } from "@/store/reducers/global";
+import GlobalHeader from "@/components/GlobalHeader";
+
+// 导入对应的Icon
+import {
+    UserOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    UploadOutlined,
+    VideoCameraOutlined,
+} from '@ant-design/icons';
+
+import styles from './index.less'
+
+const { Header, Sider, Content } = Layout;
+
+// Icon的对应表
+const IconMap = {
+    UploadOutlined: <UploadOutlined />,
+    UserOutlined: <UserOutlined />,
+    VideoCameraOutlined: <VideoCameraOutlined />
+};
+
+const BasicLayout = () => {
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const [collapsed, setCollapsed] = useState(false);
+    const currentUser = useSelector((state) => state.global.userInfo);
+    const isLogin = (localStorage.getItem("token") && location.pathname !== "/login") || false;
+    const menulist = useSelector((state) => state.global.menus)
+    const [menus, setMenus] = useState([])
+    const { token: { colorBgContainer, borderRadiusLG }, } = theme.useToken();
+
+    // 使用useEffect处理认证逻辑-缓存历史有效路径
+    useEffect(() => {
+        if (!currentUser || !isLogin) {
+            message.warning("登录已失效，请重新登录");
+            navigate("/login", { replace: true });
+            return
+        }
+
+        // 只记录有效页面（如不为 404 页）
+        if (location.pathname !== "/login" && location.pathname !== "*" ) {
+            sessionStorage.setItem("lastValidPath", location.pathname);
+        }
+
+    }, [currentUser, isLogin, navigate,location.pathname]);
+   
+
+    /** 选中的菜单项 */
+    const selectMenukey = useMemo(() => {
+        let path = location.pathname;
+        return [path];
+    }, [location.pathname]);
+    
+    
+    useEffect(() => {
+        // 加载menus，处理icon
+        const loopMenuItem = (menus) => menus.map(({ icon, children, ...item }) => ({
+            ...item,
+            icon: icon && IconMap[icon],
+            children: children ? loopMenuItem(children) : null,
+        }));
+        if (menulist?.length > 0) {
+            setMenus(loopMenuItem(menulist));
+        }
+    }, [menulist]);
+
+    return (
+      <Layout>
+        <Sider theme={"dark"} trigger={null} collapsible collapsed={collapsed}>
+          <div className={styles.logobox} />
+          <Menu
+            theme="dark"
+            mode="inline"
+            defaultSelectedKeys={["/"]}
+            selectedKeys={selectMenukey}
+            onClick={({ key }) => {
+              console.log(key);
+              navigate(key);
+            }}
+            items={menus}
+          />
+        </Sider>
+        <Layout>
+          <Header
+            className={styles.headerbox}
+            style={{
+              background: colorBgContainer,
+            }}
+          >
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                fontSize: "16px",
+                width: 64,
+                height: 64,
+              }}
+            />
+            <GlobalHeader currentUser={currentUser} />
+          </Header>
+          <Content
+            className={styles.contentbox}
+            style={{
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+            <Outlet />
+          </Content>
+        </Layout>
+      </Layout>
+    );
+};
+export default BasicLayout;
+
+
+```
+
+### “未找到”路由 “*”
+
+当没有其他路由与 URL 匹配时，您可以使用 path="*" 渲染“未找到”路由。此路由将匹配任何 URL，但具有最弱的优先级，因此路由器仅在没有其他路由匹配时才会选择它。
+
+```js
+// 举个例子
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="dashboard" element={<Dashboard />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+```
+
+#### 未定义路由自动跳转回上一个有效路径-处理404
+
+如果在地址栏输入不存在或错误的路由path，实现不显示错误页面，自动跳转到上一个有效的页面，需要处理基础路由里面的NoMatch组件
+
+
+```js
+//  pages/nomatch/index.jsx
+export default function NoMatch() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    
+    useEffect(() => {
+        // BasicLayout页面记录了上一个有效路径
+        const previousPath = location.state?.from || sessionStorage.getItem("lastValidPath") || '/'; 
+        navigate(previousPath, { replace: true }); 
+        
+    }, [location,navigate]);
+
+    return null
+}
+```
+
+### 总结
+
+通过接口返回menus 来动态引入组件，动态注册路由，动态渲染菜单，以及动态面包屑等功能，最终实现根据用户的动态权限路由，以上就是完整的配置，可以在此基础上扩展按钮级权限，如果有问题，欢迎评论区交流，谢谢 😊
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
