@@ -5,13 +5,16 @@ import Login from '../pages/login/index'
 import RedirectPage from '@/pages/404/index';
 import NoFoundPage from '@/pages/403/index';
 import NoMatch from '@/pages/nomatch/index';
+import ErrorBoundary from "@/components/Errorhandler/ErrorBoundary";
 
 
 
 const routers = [
     {
         path: "/",
-        element: <BasicLayout />,
+        element: <ErrorBoundary>
+            <BasicLayout />
+        </ErrorBoundary>,
         children: [],
     },
     {

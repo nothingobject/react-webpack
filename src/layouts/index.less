@@ -1,22 +1,30 @@
-.logobox{
-    height: 32px;
-    margin: 16px;
-    background: rgba(255, 255, 255, .2);
-    border-radius: 6px;
-}
 
-.headerbox{
-    padding: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    
-}
 
-.contentbox{
-    margin:24px 16px;
-    padding: 24;
-    min-height: 280;
-    overflow: auto;
+.layoutbox{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .logobox{
+        height: 32px;
+        margin: 16px;
+        background: rgba(255, 255, 255, .2);
+        border-radius: 6px;
+    }
+
+    .headerbox{
+        padding: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        
+    }
+
+    .contentbox{
+        height: calc(100% - 128px);
+        margin:24px 16px;
+        padding: 24px;
+        min-height: 280px;
+        overflow: auto;
+    }
 }

@@ -32,12 +32,11 @@ const AvatarDropdown = (props) => {
 
     return (
         <Dropdown  menu={{ items }} trigger={['click']}>
-        <div className={styles.avatarbox}>
-            <Avatar size={30} icon={<UserOutlined />} src={currentUser?.avatar||null} />
-            <div className={styles.name}>{currentUser?.username||''}</div>
-        </div>
-        
-    </Dropdown>
+            <div className={styles.avatarbox}>
+                <Avatar size={30} icon={<UserOutlined />} src={currentUser?.avatar||null} />
+                <div className={styles.name}>{currentUser?.username||''}</div>
+            </div>
+        </Dropdown>
     )
 }
 export default AvatarDropdown;

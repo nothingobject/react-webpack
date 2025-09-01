@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Result } from 'antd';
 import { useNavigate, useLocation } from "react-router-dom";
-
-import { ErrorContext } from "./ErrorContext";
+import  { handleError }  from '@/utils/errormonitor/errorMonitor.js';
 import { determineErrorType } from '@/utils/utils';
 
 
@@ -18,7 +17,6 @@ function withRouter(ComponentClass) {
 
 
 class ErrorBoundary extends Component {
-    static contextType = ErrorContext;
     constructor(props) {
         
         super(props);
@@ -31,24 +29,19 @@ class ErrorBoundary extends Component {
 
     componentDidCatch(error, errorInfo) {
 
+        // 已全局监听兜底，这里仅对UI进行降级处理
         // 错误类型判断
-        let errorType = 'unknown'; // 默认未知错误
+        // let errorType = 'unknown'; // 默认未知错误
 
-        errorType = determineErrorType(error);
+        // errorType = determineErrorType(error);
 
-        // 转换为字符串
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        const stack = errorInfo && errorInfo.componentStack ? errorInfo.componentStack : '';
+        // // 转换为字符串
+        // const errorMsg = error instanceof Error ? error.message : String(error);
+        // const stack = errorInfo && errorInfo.componentStack ? errorInfo.componentStack : '';
 
+        // console.log(errorMsg,"errorMsg")
+        // console.log(stack,"stack")
 
-        // 通过 context 传递错误信息
-        if (this.context && this.context.handleError) {
-            // 阻止错误继续传播
-            // error.preventDefault && error.preventDefault();
-            // 渲染错误
-            this.context.handleError({ type: errorType, message: errorMsg, stack });
-
-        }
     }
 
     componentDidUpdate(prevProps) {

@@ -14,7 +14,10 @@ export const globalSlice = createSlice({
     userInfo: {...userinfo},
     // 权限信息
     permissionInfo:{},
-    menus:[...catchMenus]
+    // 菜单
+    menus:[...catchMenus],
+    // progress状态
+    isLoading:true
   },
   reducers: {
     initmenus: (state, action) => {
@@ -39,10 +42,17 @@ export const globalSlice = createSlice({
       localStorage.removeItem('menus');
       localStorage.removeItem('userInfo');
       localStorage.removeItem('token');
-    }
+    },
+    // 修改加载状态
+    changeLoading: (state,action) => {
+        state.isLoading = action.payload;
+    },
+    setPermissionInfo: (state, action) => {
+        state.permissionInfo = action.payload;
+    },
   }
 })
 // 每个 case reducer 函数会生成对应的 Action creators
-export const { login, logout, setPermissionInfo ,setmenus} = globalSlice.actions
+export const { login, logout, setPermissionInfo ,setmenus,changeLoading} = globalSlice.actions
 
 export default globalSlice.reducer

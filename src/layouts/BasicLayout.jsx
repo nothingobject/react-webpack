@@ -2,8 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Button, Layout, Menu, theme, Spin, message } from "antd";
 import { useNavigate, Outlet, useLocation, Navigate, useOutlet } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
-import { login, logout } from "@/store/reducers/global";
+
+import { login, logout ,changeLoading} from "@/store/reducers/global";
 import GlobalHeader from "@/components/GlobalHeader";
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css'  // 这个nprogress样式必须引入
+
 
 // 导入对应的Icon
 import {
@@ -12,26 +16,55 @@ import {
     MenuUnfoldOutlined,
     UploadOutlined,
     VideoCameraOutlined,
+    HomeOutlined,
+    SettingOutlined,
+    UsergroupAddOutlined,
+    ClusterOutlined,
+    BookOutlined
+
 } from '@ant-design/icons';
 
 import styles from './index.less'
 
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content ,Footer } = Layout;
+
+// 配置基础参数
+NProgress.configure({ 
+    parent: '#root',
+    easing: 'ease', 
+    speed: 500 ,
+    showSpinner: false,// 右侧loading图标
+    minimum: 0.1 ,
+    trickleSpeed: 200,//递增速度
+    trickle: true,//自动递增
+});
 
 // Icon的对应表
 const IconMap = {
+    HomeOutlined: <HomeOutlined />,
     UploadOutlined: <UploadOutlined />,
     UserOutlined: <UserOutlined />,
-    VideoCameraOutlined: <VideoCameraOutlined />
+    VideoCameraOutlined: <VideoCameraOutlined />,
+    SettingOutlined: <SettingOutlined/>,
+    UsergroupAddOutlined: <UsergroupAddOutlined/>,
+    ClusterOutlined: <ClusterOutlined />,
+    BookOutlined: <BookOutlined />
 };
 
 const BasicLayout = () => {
 
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+//      const { animationDuration, isFinished, progress } = useNProgress({
+//     isAnimating,
+//   })
 
     const [collapsed, setCollapsed] = useState(false);
     const currentUser = useSelector((state) => state.global.userInfo);
+    const isLoading = useSelector((state) => state.global.isLoading);
+
     const isLogin = (localStorage.getItem("token") && location.pathname !== "/login") || false;
     const menulist = useSelector((state) => state.global.menus)
     const [menus, setMenus] = useState([])
@@ -45,21 +78,31 @@ const BasicLayout = () => {
             return
         }
 
+        
+        NProgress.start()
+
+        NProgress.inc();
+
+        // 默认3秒加载自动结束
+        setTimeout(() => {
+            dispatch(changeLoading(false));
+        }, 3000);
+
         // 只记录有效页面（如不为 404 页）
-        if (location.pathname !== "/login" && location.pathname !== "*" ) {
+        if (location.pathname !== "/login" && location.pathname !== "*") {
             sessionStorage.setItem("lastValidPath", location.pathname);
         }
 
-    }, [currentUser, isLogin, navigate,location.pathname]);
-   
+    }, [currentUser, isLogin, navigate, location.pathname]);
+
 
     /** 选中的菜单项 */
     const selectMenukey = useMemo(() => {
         let path = location.pathname;
         return [path];
     }, [location.pathname]);
-    
-    
+
+
     useEffect(() => {
         // 加载menus，处理icon
         const loopMenuItem = (menus) => menus.map(({ icon, children, ...item }) => ({
@@ -72,52 +115,63 @@ const BasicLayout = () => {
         }
     }, [menulist]);
 
+    // 判断是否加载完毕
+    useEffect(()=>{
+        if(!isLoading){
+            NProgress.done();
+            dispatch(changeLoading(true));
+        }
+    },[isLoading])
+
     return (
-      <Layout>
-        <Sider theme={"dark"} trigger={null} collapsible collapsed={collapsed}>
-          <div className={styles.logobox} />
-          <Menu
-            theme="dark"
-            mode="inline"
-            defaultSelectedKeys={["/"]}
-            selectedKeys={selectMenukey}
-            onClick={({ key }) => {
-              console.log(key);
-              navigate(key);
-            }}
-            items={menus}
-          />
-        </Sider>
-        <Layout>
-          <Header
-            className={styles.headerbox}
-            style={{
-              background: colorBgContainer,
-            }}
-          >
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              style={{
-                fontSize: "16px",
-                width: 64,
-                height: 64,
-              }}
-            />
-            <GlobalHeader currentUser={currentUser} />
-          </Header>
-          <Content
-            className={styles.contentbox}
-            style={{
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-          >
-            <Outlet />
-          </Content>
+        <Layout className={styles.layoutbox}>
+            <Sider theme={"dark"} trigger={null} collapsible collapsed={collapsed}>
+                <div className={styles.logobox} />
+                <Menu
+                    theme="dark"
+                    mode="inline"
+                    defaultSelectedKeys={["/"]}
+                    selectedKeys={selectMenukey}
+                    onClick={({ key }) => {
+                        console.log(key);
+                        navigate(key);
+                    }}
+                    items={menus}
+                />
+            </Sider>
+            <Layout>
+                <Header
+                    className={styles.headerbox}
+                    style={{
+                        background: colorBgContainer,
+                    }}
+                >
+                    <Button
+                        type="text"
+                        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                        onClick={() => setCollapsed(!collapsed)}
+                        style={{
+                            fontSize: "16px",
+                            width: 64,
+                            height: 64,
+                        }}
+                    />
+                    <GlobalHeader currentUser={currentUser} />
+                </Header>
+                <Content
+                    className={styles.contentbox}
+                    style={{
+                        background: colorBgContainer,
+                        borderRadius: borderRadiusLG,
+                    }}
+                >
+                    <Outlet />
+                </Content>
+                <Footer style={{ textAlign: 'center',paddingTop:0 }}>
+                    React + Redux + React-router + Ant Design © 2025   
+                </Footer>
+            </Layout>
         </Layout>
-      </Layout>
     );
 };
 export default BasicLayout;

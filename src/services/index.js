@@ -8,47 +8,64 @@ export const getAdminMenus = () => {
                 {
                     key: "/",
                     path: "/",
-                    icon: 'UserOutlined',
+                    icon: 'HomeOutlined',
                     label: "首页",
                     filepath: "home",
                 },
                 {
-                    key: "/admin",
+                    key: "/setting",
                     path: "",
-                    icon: 'VideoCameraOutlined',
-                    label: "管理员",
+                    icon: 'SettingOutlined',
+                    label: "系统管理",
                     filepath: "",
                     children: [
                         {
-                            key: "/admin/list",
-                            path: "/admin/list",
-                            icon: 'VideoCameraOutlined',
-                            label: "列表",
-                            filepath: "admin/list",
+                            key: "/setting/user",
+                            path: "/setting/user",
+                            icon: 'UserOutlined',
+                            label: "用户管理",
+                            filepath: "setting/user",
                         },
                         {
-                            key: "/admin/detail",
-                            path: "/admin/detail",
-                            icon: 'VideoCameraOutlined',
-                            label: "详情",
-                            filepath: "admin/detail",
-                        }
+                            key: "/setting/role",
+                            path: "/setting/role",
+                            icon: 'UsergroupAddOutlined',
+                            label: "角色管理",
+                            filepath: "setting/role",
+                        },
+                        
+
+                        {
+                            key: "/setting/menu",
+                            path: "/setting/menu",
+                            icon: 'ClusterOutlined',
+                            label: "菜单管理",
+                            filepath: "setting/menu",
+                        },
+
                     ]
                 },
+                // {
+                //     key: "/backend",
+                //     path: "/backend",
+                //     icon: 'UploadOutlined',
+                //     label: "页面",
+                //     filepath: "backend",
+                // },
+                // {
+                //     key: "/demo",
+                //     path: "/demo",
+                //     icon: 'UploadOutlined',
+                //     label: "测试页",
+                //     filepath: "demo",
+                // },
                 {
-                    key: "/backend",
-                    path: "/backend",
-                    icon: 'UploadOutlined',
-                    label: "非管理员",
-                    filepath: "backend",
-                },
-                {
-                    key: "/demo",
-                    path: "/demo",
-                    icon: 'UploadOutlined',
-                    label: "测试页",
-                    filepath: "demo",
-                },
+                    key: "/notes",
+                    path: "/notes",
+                    icon: 'BookOutlined',
+                    label: "求职简历",
+                    filepath: "notes",
+                }
             ]);
         }, 1000);
     });
