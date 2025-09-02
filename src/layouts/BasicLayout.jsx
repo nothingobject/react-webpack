@@ -57,10 +57,6 @@ const BasicLayout = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-//      const { animationDuration, isFinished, progress } = useNProgress({
-//     isAnimating,
-//   })
-
     const [collapsed, setCollapsed] = useState(false);
     const currentUser = useSelector((state) => state.global.userInfo);
     const isLoading = useSelector((state) => state.global.isLoading);
@@ -86,7 +82,7 @@ const BasicLayout = () => {
         // 默认3秒加载自动结束
         setTimeout(() => {
             dispatch(changeLoading(false));
-        }, 3000);
+        }, 1000);
 
         // 只记录有效页面（如不为 404 页）
         if (location.pathname !== "/login" && location.pathname !== "*") {

@@ -1,7 +1,7 @@
 import { message } from "antd";
 
 export const handleChangeRequestHeader = (config) => {
-  config["xxxx"] = "xxx";
+  config["authorization"] = "xxx";
   return config;
 };
 

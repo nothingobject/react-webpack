@@ -26,7 +26,6 @@ const AvatarDropdown = (props) => {
     ];
 
     useEffect(() => {
-        console.log('AvatarDropdown');
 
     }, [])  
 

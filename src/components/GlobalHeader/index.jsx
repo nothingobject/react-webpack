@@ -1,9 +1,7 @@
 
 import React, { useState } from 'react';
-// import { connect } from 'umi';
 import Avatar from './AvatarDropdown';
 import Breadcrumb from './Breadcrumb';
-import { Space } from 'antd';
 import github from '@/static/images/github-fill.png';
 
 
@@ -11,7 +9,9 @@ import styles from './index.less';
 
 const GlobalHeader = (props) => {
 
-    const [count,setCount] =useState(0)
+    const gotoSourceCode = ()=>{
+        window.open('https://github.com/nothingobject/react-webpack')
+    }
   
   return (
     <div className={styles.container} >
@@ -19,9 +19,7 @@ const GlobalHeader = (props) => {
             <Breadcrumb/>
         </div>
         <div className={styles.rightbox}>
-            <a href="https://github.com/nothingobject/react-webpack" style={{height:44}}>
-                <img src={github} alt="" className={styles.sourcecode}/>
-            </a>
+            <img src={github} alt="github_url" className={styles.sourcecode} onClick={gotoSourceCode}/>
             <Avatar />
         </div>
         
