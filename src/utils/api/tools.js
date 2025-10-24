@@ -1,19 +1,84 @@
 import { message } from "antd";
 
+let isRefreshing = false // 是否正在刷新token
+const queueTask = [] // 刷新token期间的请求队列
+
+
 export const handleChangeRequestHeader = (config) => {
-  config["authorization"] = "xxx";
+//   config["authorization"] = "xxx";
   return config;
 };
 
 export const handleConfigureAuth = (config) => {
-    const accessToken = localStorage.get('access_token');
-
+    const accessToken = localStorage.getItem('access_token');
+    
     if(accessToken){
-        config.headers["authorization"] = "Bearer" +  accessToken;
+        config.headers["authorization"] = "Bearer " +  accessToken;
     }
   
     return config;
 };
+
+
+// 清除身份信息
+const clearAuth = (error) => {
+    console.log('身份过期，请重新登录')
+    localStorage.clear();
+    return Promise.reject(error);
+}
+
+// 处理刷新token
+export const handleTokenRefresh = async (axiosInstance,err) => {
+    let { config } = err;
+
+    // 判断是否login失败且状态码401
+    if (config.url?.includes('login')) {
+        message.error(err?.data?.message)
+        return Promise.reject(err);
+    }
+    
+    // 判断是否有refresh_token
+    const refreshToken = localStorage.getItem('refresh_token');
+
+    if(!refreshToken){
+        return clearAuth(err)
+    }
+
+    
+
+    // 判断是否refresh失败且状态码401，再次进入错误拦截器
+    if (config.url?.includes('refresh')) {
+        return clearAuth(err);
+    }
+
+    // 判断是否刷新中
+    if(!isRefreshing) {
+        isRefreshing = true;
+        const result = await axiosInstance.patch('/api/auth/refresh',{refreshToken});
+        if(result?.data){
+            // 重新设置token
+            localStorage.setItem('access_token', result.data.accessToken);
+            localStorage.setItem('refresh_token', result.data.refreshToken);
+
+            queueTask.forEach(({config, resolve}) => {
+                resolve(axiosInstance(config))
+            })
+            queueTask.length = 0;
+            // message.warning('新的token获取成功')
+            return axiosInstance(config);
+        }
+
+    }
+
+    return new Promise((resolve) => {
+        queueTask.push({
+            config,
+            resolve
+        });
+    });
+
+}
+
 
 export const handleNetworkError = (errStatus) => {
   const networkErrMap = {

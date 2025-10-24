@@ -1,19 +1,17 @@
+/**
+ * @file 首页
+ * @date 2025/10/24 12:46:27
+ * @author lyqjob@yeah.net
+ */
+
+
 import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-// import { decrement, increment } from "@/store/reducers/global";
 import styles from './index.less'
 import { Card, Col, Row } from 'antd';
-// import { CSSTransition, TransitionGroup } from 'react-transition-group'
-// import { useNProgress } from '@tanem/react-nprogress'
-
 
 
 const Home = () => {
-    const count = useSelector((state) => state.global.value);
-    const dispatch = useDispatch()
-
    
-
     return (
         <div className={styles.container}>
             <Row gutter={16}>
@@ -66,9 +64,19 @@ const Home = () => {
                 </Col>
                 
             </Row>
+            <Row gutter={16} style={{ marginTop: 16 }}>
+                <Col span={12}>
+                    <Card type="inner" title="NodeJS + Express + MySQL" >
+                        采用 NodeJS + Express + MySQL实现后端服务，整合JWT认证
+                    </Card>
+                </Col>
+                <Col span={12}>
+                    <Card  type="inner" title="无感刷新Token" >
+                        采用accessToken + refreshToken 的双Token方案，实现持久登录，无感刷新Token
+                    </Card>
+                </Col>
                 
-            {/* <h2>该项目采用 React 18  +  React-router V6  +  Redux Tookit  +  Webpack 5  +  Ant Design 5  搭建 </h2>
-      <h2>集成了全局错误捕获处理  +  动态权限控制路由功能，是一套插拔可用的React中后台项目模版</h2> */}
+            </Row>
         </div>
     )
 }

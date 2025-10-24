@@ -74,6 +74,7 @@ export const isDataInLocalStorageAndNotEmpty=(key)=> {
 export const flattenMenus = (items) => {
     return items.reduce((pre, item) => {
         
+
         // 创建当前项的扁平对象
         const flatItem = {
             children:item.children,
@@ -98,6 +99,62 @@ export const flattenMenus = (items) => {
         return pre;
     }, []);
 };
+
+
+/**
+ * 从菜单数据中提取树形菜单和按钮权限数组
+ * @param {Array} menus 原始菜单数组
+ * @returns {Object} { treeMenus, buttonList }
+ */
+export function extractMenusAndButtons(menus) {
+    const treeMenus = []; // 树形菜单
+    const buttonList = []; // 按钮权限
+    const flatFiles = []; // 扁平化菜单文件路径
+
+
+    // 递归获取菜单
+    function traverse(items) {
+        return items.map(item => {
+            // 扁平化菜单节点
+            if (item.node_type === 2) {
+                if(flatFiles.includes(item.component_path) === false){
+                    flatFiles.push({path:item.route_path,filepath:item.component_path});
+                }
+    
+            }
+
+            // 按钮节点
+            if (item.node_type === 3) {
+                if (item.menu_code) buttonList.push(item.menu_code);
+                return null;
+            }
+
+
+            // 普通菜单节点
+            const menuItem = {
+                key: item.route_path, // 唯一标识
+                label:item.name, 
+                icon: item.icon,
+                children: item.children ? traverse(item.children).filter(Boolean) : undefined
+            };
+
+            if(item.node_type === 2 && menuItem.children?.length === 0){
+                menuItem.children = undefined; // 叶子节点不展开
+            }
+            return menuItem;
+        }).filter(Boolean);
+    }
+
+    if(menus && menus?.length>0){
+        treeMenus.push(...traverse(menus));
+    }
+    // 递归扁平化菜单
+
+    
+
+    return { treeMenus, buttonList , flatFiles};
+}
+
 
 
 export function generateUuid(){
@@ -162,3 +219,47 @@ export const determineErrorType = (error) => {
     
     return 'unknown';
 };
+
+
+/**
+ * 空值判断
+ * @date 2025/09/23 11:09:04
+ * @author lyqjob@yeah.net
+ * @description undefined,null,"",[],{},Set(),Map(),0,false 均视为空
+ * 
+ * @export
+ * @param {*} value 
+ * @returns {boolean} 
+ */
+export function isEmpty(value){
+    // null 或 undefined
+    if(value === null || value === undefined){
+        return true;
+    }
+    // 字符串
+    if(typeof value === 'string' && value.trim() === ''){
+        return true;
+    }
+    // 数字0
+    if(typeof value === 'number' && value === 0){
+        return true;
+    }
+    // 布尔值 false
+    if(typeof value === 'boolean' && value === false){
+        return true;
+    }
+    // 数组
+    if(Array.isArray(value) && value.length === 0){
+        return true;
+    }
+    // 对象
+    if(typeof value === 'object' && !Array.isArray(value)){
+        return Object.keys(value).length === 0;
+    }
+    // Set 或 Map
+    if((value instanceof Set || value instanceof Map) && value.size === 0){
+        return true;
+    }
+    
+    return false;
+}

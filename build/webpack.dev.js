@@ -19,13 +19,13 @@ module.exports = merge(baseConfig, {
     proxy: [
       {
         context: ["/api"],
-        target: "http://localhost:3000",
+        target: "http://localhost:8888",
         pathRewrite: { "^/api": "" },
         changeOrigin: true,
       },
     ],
     open: true, // 自动打开浏览器
-    port: 8888, // 端口号
+    port: 8000, // 端口号
     hot: true, // 热更新
     historyApiFallback: true, // 当使用HTML5 History API时，所有的跳转将fallback到index.html
   },

@@ -33,7 +33,7 @@ const AvatarDropdown = (props) => {
         <Dropdown  menu={{ items }} trigger={['click']}>
             <div className={styles.avatarbox}>
                 <Avatar size={30} icon={<UserOutlined />} src={currentUser?.avatar||null} />
-                <div className={styles.name}>{currentUser?.username||''}</div>
+                <div className={styles.name}>{currentUser?.name||''}</div>
             </div>
         </Dropdown>
     )

@@ -61,23 +61,25 @@ const BasicLayout = () => {
     const currentUser = useSelector((state) => state.global.userInfo);
     const isLoading = useSelector((state) => state.global.isLoading);
 
-    const isLogin = (localStorage.getItem("token") && location.pathname !== "/login") || false;
+    const isLogin = (localStorage.getItem("access_token") && location.pathname !== "/login") || false;
     const menulist = useSelector((state) => state.global.menus)
     const [menus, setMenus] = useState([])
     const { token: { colorBgContainer, borderRadiusLG }, } = theme.useToken();
 
     // 使用useEffect处理认证逻辑-缓存历史有效路径
     useEffect(() => {
-        if (!currentUser || !isLogin) {
+
+        if (!currentUser?.name || !isLogin) {
             message.warning("登录已失效，请重新登录");
             navigate("/login", { replace: true });
             return
         }
 
+        window.process = NProgress;
         
-        NProgress.start()
+        window.process.start()
 
-        NProgress.inc();
+        window.process.inc();
 
         // 默认3秒加载自动结束
         setTimeout(() => {
@@ -114,10 +116,12 @@ const BasicLayout = () => {
     // 判断是否加载完毕
     useEffect(()=>{
         if(!isLoading){
-            NProgress.done();
+            window.process.done();
             dispatch(changeLoading(true));
         }
     },[isLoading])
+
+    // console.log(menus,"menus")
 
     return (
         <Layout className={styles.layoutbox}>

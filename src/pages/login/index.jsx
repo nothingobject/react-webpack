@@ -1,10 +1,17 @@
+/**
+ * @file 登录页
+ * @date 2025/10/24 12:46:49
+ * @author lyqjob@yeah.net
+ */
+
 import React, { use, useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate ,Outlet , useLocation,} from "react-router-dom";
-import { login ,setmenus} from "@/store/reducers/global";
-import { getAdminMenus } from "@/services/index";
+import { login ,setmenus,setbuttons,setasyncfiles} from "@/store/reducers/global";
+import { flattenData , extractMenusAndButtons} from "@/utils/utils";
+import { userApi } from "@/services/admin";
 
 import styles from "./index.less";
 
@@ -12,50 +19,38 @@ const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [loading,setLoading]=useState(false)
-    const onFinish = (values) => {
-        console.log("1111")
+    const onFinish = async (values) => {
         setLoading(true)
-      let res = {
-        token: "000000000000000",
-        userinfo: {
-          username: "超级管理员",
-          avatar:
-            "https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg",
-        },
-        permissions: {
-          role: [],
-          routers: [],
-        },
-      };
+        const [err,res] =await userApi.login(values)
+        if(err){
+           setLoading(false) 
+        }
+        if(res){
+            dispatch(
+                login({
+                    userinfo: res.userinfo,
+                    accessToken: res.accessToken,
+                    refreshToken: res.refreshToken,
+                })
+            );
+            const { treeMenus, buttonList , flatFiles } = extractMenusAndButtons(res.menus);
 
-      dispatch(
-        login({
-          userinfo: res.userinfo,
-          token: res.token,
-        })
-      );
-
-      // 获取菜单
-      
-      getAdminMenus().then((list) => {
-
-        dispatch(setmenus(list));
-        
-        message.success("登录成功",1, () => {
-            setLoading(false)
-          navigate("/", { replace: true });
-        });
-    }).catch(()=>{
-        setLoading(false)
-    })
+            dispatch(setmenus(treeMenus));
+            dispatch(setbuttons(buttonList));
+            dispatch(setasyncfiles(flatFiles));
+            
+            message.success("登录成功",1, () => {
+                setLoading(false)
+                navigate("/", { replace: true });
+            });
+        }
     
-
     };
     return (
         <div className={styles.container}>
             <Form
                 name="login"
-                initialValues={{ remember: false ,username:'admin',password:'password'}}
+                initialValues={{ remember: false ,username:'rootadmin',password:'rootadmin'}}
                 style={{ maxWidth: 800 }}
                 onFinish={onFinish}
                 className={styles.formbox}

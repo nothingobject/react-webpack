@@ -6,12 +6,13 @@ import {
     handleConfigureAuth,
     handleAuthError,
     handleGeneralError,
-    handleNetworkError
+    handleNetworkError,
+    handleTokenRefresh
 } from './tools'
 
 // 配置基础
-axios.create({
-    timeout: 1000,
+const axiosInstance = axios.create({
+    timeout: 100000,
     headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json; charset=UTF-8',
@@ -20,7 +21,7 @@ axios.create({
 
 
 // 请求拦截
-axios.interceptors.request.use((config) => {
+axiosInstance.interceptors.request.use((config) => {
     config = handleChangeRequestHeader(config)
     config = handleConfigureAuth(config)
     return config
@@ -28,28 +29,29 @@ axios.interceptors.request.use((config) => {
 
 
 // 响应拦截
-axios.interceptors.response.use(
+axiosInstance.interceptors.response.use(
     (response) => {
+        
         if (response.status !== 200) return Promise.reject(response.data)
         // handleAuthError(response.data.errno)
         // handleGeneralError(response.data.errno, response.data.errmsg)
         return response
     },
     async (err) => {
-        let { data , config} = err.response;
-        if(data.status === 401 ){
-            handleTokenRefresh()
-            return
+        
+        if(err.status === 401){
+           return handleTokenRefresh(axiosInstance, err.response)
         }
-        handleNetworkError(err.response.status)
-        Promise.reject(err.response)
+
+        handleNetworkError(err.response.status);
+        return Promise.reject(err.response);
     }
 )
 
 // 封装Get
 export const Get = (url, params = {}, clearFn) =>
     new Promise((resolve) => {
-        axios
+        axiosInstance
             .get(url, { params })
             .then((result) => {
                 let res
@@ -65,10 +67,23 @@ export const Get = (url, params = {}, clearFn) =>
             })
     })
 
+// 封装Delete
+export const Delete = (url, params = {}) =>
+    new Promise((resolve) => {
+        axiosInstance
+            .delete(url, { params })
+            .then((result) => {
+                resolve([null, result.data])
+            })
+            .catch((err) => {
+                resolve([err, undefined])
+            })
+    })
+
 // 封装Post
 export const Post = (url, data, params = {}) => {
     return new Promise((resolve) => {
-        axios
+        axiosInstance
             .post(url, data, { params })
             .then((result) => {
                 resolve([null, result.data])

@@ -2061,9 +2061,171 @@ export default function NoMatch() {
 }
 ```
 
-### 总结
-
 通过接口返回menus 来动态引入组件，动态注册路由，动态渲染菜单，以及动态面包屑等功能，最终实现根据用户的动态权限路由，以上就是完整的配置，可以在此基础上扩展按钮级权限，如果有问题，欢迎评论区交流，谢谢 😊
+
+
+## --------------------------- 2025-10-24 更新 -------------------------------
+
+## 按钮权限组件
+
+原来的只支持页面级权限，现在增加了按钮权限AuthButton组件
+
+```js
+const AuthButton = ({
+    children,
+    authority,
+}) => {
+
+    const checkPermissions = (authority, target) => {
+        const permission = useSelector((state) => state.global.permission);
+
+        if (typeof authority === 'string') {
+            if (permission.includes(authority)) {
+                return target;
+            }
+            return null
+        }
+
+        return null;
+    };
+    const childrenRender = typeof children === 'undefined' ? null : children;
+    const dom = checkPermissions(authority, childrenRender);
+    return <>{dom}</>;
+};
+
+export default AuthButton;
+
+```
+
+通过redux获取对应的按钮权限，校验不通过不渲染按钮
+
+```js
+<AuthButton authority="authority">
+    <a onClick={}>按钮</a>
+</AuthButton>
+
+```
+
+## 无感刷新Token
+
+无感刷新token，通过access_token 和refresh_token 来实现无感刷新，access_token设置过期时间较短，一般是1h，refresh_token过期时间较长，一般是7天或30天
+
+### 具体流程
+
+#### 无限循环Token 
+```js
+用户登录 -> 获取access_token 和refresh_token -> access_token过期 （refresh_token过期前）-> 用refresh_token获取新的access_token 和refresh_token -> 自动续期
+```
+
+这一种是登录一次后，在refresh_token过期之前再登录，只要不超期，理论上可以一直不用重新登录
+
+#### 到期失效Token
+
+```js
+用户登录 -> 获取access_token 和refresh_token -> access_token过期 （refresh_token过期前）-> 用refresh_token获取新的access_token  -> 自动续期 -> refresh_token过期结束
+```
+这一种是登录一次后，在refresh_token过期之前再登录，直到refresh_token过期后需要重复登录，这种相对更安全一点
+
+### 代码实现
+
+结合的是Axios 响应拦截来实现
+
+```js
+// 响应拦截
+axiosInstance.interceptors.response.use(
+    (response) => {
+        
+        if (response.status !== 200) return Promise.reject(response.data)
+        // handleAuthError(response.data.errno)
+        // handleGeneralError(response.data.errno, response.data.errmsg)
+        return response
+    },
+    async (err) => {
+        
+        if(err.status === 401){
+           return handleTokenRefresh(axiosInstance, err.response)
+        }
+
+        handleNetworkError(err.response.status);
+        return Promise.reject(err.response);
+    }
+)
+
+```
+
+```js
+let isRefreshing = false // 是否正在刷新token
+const queueTask = [] // 刷新token期间的请求队列
+// 处理刷新token
+export const handleTokenRefresh = async (axiosInstance,err) => {
+    let { config } = err;
+
+    // 判断是否login失败且状态码401
+    if (config.url?.includes('login')) {
+        message.error(err?.data?.message)
+        return Promise.reject(err);
+    }
+    
+    // 判断是否有refresh_token
+    const refreshToken = localStorage.getItem('refresh_token');
+
+    if(!refreshToken){
+        return clearAuth(err)
+    }
+
+    // 判断是否refresh失败且状态码401，再次进入错误拦截器
+    if (config.url?.includes('refresh')) {
+        return clearAuth(err);
+    }
+
+    // 判断是否刷新中
+    if(!isRefreshing) {
+        isRefreshing = true;
+        const result = await axiosInstance.patch('/api/auth/refresh',{refreshToken});
+        if(result?.data){
+            // 重新设置token
+            localStorage.setItem('access_token', result.data.accessToken);
+            localStorage.setItem('refresh_token', result.data.refreshToken);
+
+            queueTask.forEach(({config, resolve}) => {
+                resolve(axiosInstance(config))
+            })
+
+            queueTask.length = 0;
+
+            // message.warning('新的token获取成功')
+            return axiosInstance(config);
+        }
+
+    }
+
+    return new Promise((resolve) => {
+        queueTask.push({
+            config,
+            resolve
+        });
+    });
+
+}
+
+```
+
+```js
+// 清除身份信息
+const clearAuth = (error) => {
+    console.log('身份过期，请重新登录')
+    localStorage.clear();
+    return Promise.reject(error);
+}
+
+```
+
+除了以上之外，还对接了后端接口，后端采用 NodeJs + Express 实现 ，后面会把后端代码也更新到仓库
+
+## 总结
+
+以上基本涵盖了基础的项目的权限认证模块，采用RBAC 权限控制模型 用户 -(多对多)-> 角色 -(多对多)-> 菜单(按钮)，作为基础模版是够了，不足之处还请谅解。下一步打算采用Antd Pro Components 以及全面对接TS，接入AI 模型 及系统监控等，感谢阅读
+
 
 
 

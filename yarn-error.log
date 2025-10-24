@@ -1,8 +1,8 @@
 Arguments: 
-  /Users/liyongqi/.nvm/versions/node/v18.20.8/bin/node /usr/local/Cellar/yarn/1.22.10/libexec/bin/yarn.js add date-fns/format -D
+  /Users/liyongqi/.nvm/versions/node/v18.20.8/bin/node /usr/local/Cellar/yarn/1.22.10/libexec/bin/yarn.js add @ant-design/pro-components —S
 
 PATH: 
-  /Users/liyongqi/.nvm/versions/node/v18.20.8/bin:/Users/liyongqi/.nvm/versions/node/v18.20.8/bin:/Users/liyongqi/.nvm/versions/node/v14.19.2/bin:/Users/liyongqi/.nvm/versions/node/v14.19.2/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/liyongqi/.nvm/versions/node/v14.19.2/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/Users/liyongqi/Library/Android/sdk/platform-tools:/Users/liyongqi/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand:/Users/liyongqi/Library/Android/sdk/platform-tools
+  /Users/liyongqi/.nvm/versions/node/v18.20.8/bin:/Users/liyongqi/.nvm/versions/node/v14.19.2/bin:/Users/liyongqi/.nvm/versions/node/v14.19.2/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/liyongqi/.nvm/versions/node/v14.19.2/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/Users/liyongqi/Library/Android/sdk/platform-tools:/Users/liyongqi/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand:/Users/liyongqi/Library/Android/sdk/platform-tools
 
 Yarn version: 
   1.22.10
@@ -14,15 +14,20 @@ Platform:
   darwin x64
 
 Trace: 
-  Error: https://github.com/date-fns/format: ETIMEDOUT
-      at Timeout._onTimeout (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:141409:19)
-      at listOnTimeout (node:internal/timers:569:17)
-      at process.processTimers (node:internal/timers:512:7)
+  TypeError [ERR_UNESCAPED_CHARACTERS]: https://registry.npm.taobao.org/—S: Request path contains unescaped characters
+      at new NodeError (node:internal/errors:405:5)
+      at new ClientRequest (node:_http_client:183:13)
+      at Object.request (node:https:366:10)
+      at module.exports.Request.start (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:141311:32)
+      at module.exports.Request.end (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:142070:10)
+      at end (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:141124:14)
+      at Immediate.<anonymous> (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:141138:7)
+      at process.processImmediate (node:internal/timers:476:21)
 
 npm manifest: 
   {
     "name": "react-webpack",
-    "version": "1.1.0",
+    "version": "1.0.0",
     "main": "index.js",
     "license": "MIT",
     "author": {
@@ -47,6 +52,8 @@ npm manifest:
       "@reduxjs/toolkit": "^2.8.2",
       "antd": "^5.26.2",
       "axios": "^1.10.0",
+      "moment": "^2.30.1",
+      "nprogress": "^0.2.0",
       "react": "18.2.0",
       "react-dom": "18.2.0",
       "react-redux": "^9.2.0",
@@ -3527,6 +3534,11 @@ Lockfile:
     dependencies:
       brace-expansion "^1.1.7"
   
+  moment@^2.30.1:
+    version "2.30.1"
+    resolved "https://registry.npmmirror.com/moment/-/moment-2.30.1.tgz#f8c91c07b7a786e30c59926df530b4eac96974ae"
+    integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
+  
   mrmime@^2.0.0:
     version "2.0.1"
     resolved "https://registry.npmmirror.com/mrmime/-/mrmime-2.0.1.tgz#bc3e87f7987853a54c9850eeb1f1078cd44adddc"
@@ -3605,6 +3617,11 @@ Lockfile:
     version "0.1.2"
     resolved "https://registry.npmmirror.com/normalize-range/-/normalize-range-0.1.2.tgz#2d10c06bdfd312ea9777695a4d28439456b75942"
     integrity sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==
+  
+  nprogress@^0.2.0:
+    version "0.2.0"
+    resolved "https://registry.npmmirror.com/nprogress/-/nprogress-0.2.0.tgz#cb8f34c53213d895723fcbab907e9422adbcafb1"
+    integrity sha512-I19aIingLgR1fmhftnbWWO3dXc0hSxqHQHQb3H8m+K3TnEn/iSeTZZOyvKXWqQESMwuUVnatlCnZdLBZZt2VSA==
   
   nth-check@^2.0.1:
     version "2.1.1"

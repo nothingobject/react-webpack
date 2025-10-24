@@ -4,6 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 
 import { useSelector } from 'react-redux';
+
 const BreadcrumbList = memo(() => {
     const location = useLocation();
     const menus = useSelector((state) => state.global.menus);
@@ -11,7 +12,7 @@ const BreadcrumbList = memo(() => {
      // 递归查找菜单项
     const findMenuByPath = (path, menuList) => {
         for (const menu of menuList) {
-            if (menu.path === path) {
+            if (menu.key === path) {
                 return menu;
             }
             if (menu.children) {
@@ -28,7 +29,6 @@ const BreadcrumbList = memo(() => {
 
         const pathSnippets = location.pathname.split('/').filter(i => i);
         
-        
         const items = [];
         let url = '';
         // 添加首页
@@ -40,13 +40,19 @@ const BreadcrumbList = memo(() => {
         pathSnippets.forEach((snippet, index) => {
             url += `/${snippet}`;
             const menu = findMenuByPath(url, menus);
-            if (menu) {
+            if (!menu.children) {
                 items.push({
                     title: index === pathSnippets.length - 1 ? 
                         menu.label : 
                         <Link to={url}>{menu.label}</Link>,
                 });
+                return
             }
+            items.push({
+                title:menu.label
+            });
+
+            
         });
         return items;
 

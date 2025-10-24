@@ -1,3 +1,9 @@
+/**
+ * @file 路由重定向
+ * @date 2025/10/24 12:45:55
+ * @author lyqjob@yeah.net
+ */
+
 import React, { useEffect } from "react";
 import { useNavigate ,useLocation} from "react-router-dom";
 import { Button, Result , message} from 'antd';
