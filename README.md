@@ -5,6 +5,9 @@
 
 之前做项目都是用的现成的 umi 、 antd-pro 、create-react-app 等现成的 react 框架或脚手架，这次重新找工作打算沉淀一下 webpack 技术，前 2 天心血来潮打算构建一份可用的 react 基础脚手架，从webpack 初始化搞起，到配置 Babel、配置 Plugin，再到配置 react-router，用的基本都是目前主流的，也方便随时回头看，每一步在 README.md 都有对应的解析
 
+## 2025-12-18 项目停止维护
+请转完整全栈项目[https://github.com/nothingobject/wl-admin-root](https://github.com/nothingobject/wl-admin-root)
+
 ## 项目目录
 
 ```
